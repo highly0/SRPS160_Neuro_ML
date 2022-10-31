@@ -25,7 +25,7 @@ warnings.warn = warn
 import monai
 from monai.apps import download_and_extract
 from monai.config import print_config
-from monai.data import DataLoader, Dataset, ImageDataset
+from monai.data import DataLoader, Dataset, ImageDataset, CacheDataset
 from monai.data import NibabelReader
 from monai.transforms import (
     EnsureChannelFirst,
@@ -169,13 +169,13 @@ def get_loader(images, labels, train_transforms, val_transforms, pin_memory):
     ]
 
     # create a training data loader
-    train_ds = Dataset(data=train_files, transform=train_transforms)
+    train_ds = CacheDataset(data=train_files, transform=train_transforms)
     train_loader = DataLoader(
         train_ds, batch_size=16, shuffle=True, pin_memory=pin_memory
     )
 
     # create a validation data loader
-    val_ds = Dataset(data=val_files, transform=val_transforms)
+    val_ds = CacheDataset(data=val_files, transform=val_transforms)
     val_loader = DataLoader(val_ds, batch_size=16, pin_memory=pin_memory)
 
     return train_loader, val_loader, train_ds, val_ds
@@ -337,8 +337,8 @@ if __name__ == "__main__":
 
     loss_function = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
-    #scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=20)
-    scheduler = None
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=20)
+    #scheduler = None
     max_epochs = args.num_epoches
     now = datetime.now()
     curr_time = now.isoformat()
